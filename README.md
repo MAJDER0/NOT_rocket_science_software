@@ -4,9 +4,9 @@ pzdr
 
 ## Do oryginalnego repozytorium zostały dodane:
 
-* Warstwa stacji naziemnej, która automatyzuje cały lot rakiety w symulatorze. Zawiera klienta do komunikacji z rakietą, logikę sekwencji startu i prostego autopilota: tankowanie, grzanie, uzbrojenie, zapłon, wykrywanie apogeum, wyrzucenie spadochronu i lądowanie.
+* Warstwa stacji naziemnej, która automatyzuje cały lot rakiety w symulatorze. Zawiera klienta do komunikacji z rakietą, logikę sekwencji startu i prostego autopilota: tankowanie, grzanie, uzbrojenie, zapłon, wykrywanie apogeum, wyrzucenie spadochronu i lądowanie
 
-* Prototypowa implementacja protokołu komunikacyjnego w Ruście, gdzie enkoduje ramki w sposob analogiczny do tego w pythonie.
+* Prototypowa implementacja protokołu komunikacyjnego w Ruście, gdzie enkoduje ramki w sposob analogiczny do tego w pythonie
 
 ## Foldery i pliki dodane:
 
@@ -45,7 +45,7 @@ https://github.com/user-attachments/assets/d09c9729-24d3-400a-ace6-5eed1b037f6f
       
       - Terminal #3
         
-              ground_station/launch_sequencer.py
+              python ground_station/launch_sequencer.py
   
 2. Test Encodera ramek protokołu komunikacyjnego w Rust (root/rust_protocol):
    
