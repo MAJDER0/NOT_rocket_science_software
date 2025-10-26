@@ -1,172 +1,144 @@
-# Zadanie rekrutacyjne, AGH Space Systems Rocket Software jesień 2025
+# Overview
 
-Gratulujemy w przejściu do kolejnego etapu rekrutacji do naszego koła!
-Jako materiały do zadania przygotowaliśmy dla Ciebie uproszczony wycinek naszego stack'u komunikacyjnego dostępny w folderze ```communication_library```.
-biblioteka zawiera implementacje ramki komunikacyjnej, kodowania/dekodowania, klasy zarządzającej komunikacją, numerów identyfikacyjnych specyficznych dla protokołu oraz klasy odpowiadającej za komunikację TCP w infrastrukturze.
+pzdr 
 
-Dodatkowo zawarliśmy tutaj prosty symulator rakiety ```tcp_simulator.py``` oraz narzędzie do połączenia się z nim ```tcp_proxy.py```.
-Dokumentacja opisująca jak z nich korzystać jest dostępna poniżej pod treścią zadania.
+## Do oryginalnego repozytorium zostały dodane:
 
-## Zadanie
+* Warstwa stacji naziemnej, która automatyzuje cały lot rakiety w symulatorze. Zawiera klienta do komunikacji z rakietą, logikę sekwencji startu i prostego autopilota: tankowanie, grzanie, uzbrojenie, zapłon, wykrywanie apogeum, wyrzucenie spadochronu i lądowanie.
 
-Celem zadania jest skorzystanie z dostępnych materiałów i przygotowanie kodu wchodzącego w interakcję z symulatorem rakiety. Zadanie nie posiada ścisłego punktu końcowego, to co w nim zrobisz zależy od Ciebie ;) 
-Symulator pozwala na wysyłanie poleceń sterujących do rakiety oraz odbierania potwierdzeń operacji i odczytów z sensorów dostępnych na pokładzie. Za pomocą symulatora można przeprowadzić lot rakiety począwszy od tankowania aż po lądowanie na spadochronie. Konkrety odnośnie działania symulatora są dostępne poniżej w dokumentacji.
+* Prototypowa implementacja protokołu komunikacyjnego w Ruście, gdzie enkoduje ramki w sposob analogiczny do tego w pythonie.
 
-Istnieje wiele podejść do tego zadania, Twój kod nie musi nawet wykonywać z sukcesem lotu rakiety!.
-Jeśli wizualizacja danych jest Twoją mocną stroną to możesz skupić się na stworzeniu aplikacji przedstawiającej stan rakiety w czytelny sposób.
-Preferujesz skupić się na locie? Bez problemu, możesz stworzyć aplikację przede wszystkim skupioną na sterowaniu, zawierającą na przykład blokady przed wykonaniem niepoprawnej operacji w danym momencie startu lub całkowicie automatyzującą start i jedynie wyświetlającą progress wykonywanych operacji.
-A może wolisz przerobić którąś z części ```communication_library``` na Rust'a, podpiąć ją do pythona i wykonać resztę lotu prostym skryptem? To również możliwe!
+## Foldery i pliki dodane:
 
-Zadanie pozostawia Ci dowolność w wykonaniu tego co zechcesz, chętnie zobaczymy co zdecydujesz się nam przedstawić :)
-Jeśli zabrakło by Ci czasu na dokończenie zadania to bez obaw, śmiało możecie przysyłać zadania nawet jeśli są work in progress albo nie wszystko działa.
-W przypadku jeśli zastanawiasz się z jakiego UI frameworka skorzystać to polecamy NiceGUI (https://nicegui.io/), z którego również sami korzystamy. Jeśli jednak wolisz użyć czegoś innego to też nie ma problemu.
+**1. ground_station:**
+   - flight_controller.py
+   - launch_sequencer.py
+   - rocket_client.py
 
-W razie pytań prosimy kontaktować się na adres mailowy z którego otrzymano informację o przejściu do drugiego etapu, lub zrobić issue w tym repozytorium z pytaniem (szczególnie preferowane jeśli pytanie odnosi się do kodu).
+**2. rust_protocol:**
+   - crc.rs
+   - frame.rs
+   - lib.rs
+   - tests/encode_demo.rs
 
-Zadania prosimy wrzucać na publiczne repozytorium i przesłanie nam linku do niego na adres mailowy z którego otrzymano informację o przejściu do drugiego etapu. Jeśli nie chcesz wrzucać kodu na publiczne repozytorium to również możesz nam przesłać zip z kodem, chociaż repozytoria bardzo ułatwiłyby nam weryfikację zadań.
+## Prezentacja
 
-## Dokumentacja
+### Symulacja Lotu Rakiety: ###
 
-### Setup
+https://github.com/user-attachments/assets/9e47ab9a-4539-4bf6-a52c-134257a17958
 
-Aby skorzystać z repozytorium zinstaluj następujące biblioteki:
-```bash
-pip install crccheck bitstruct pyyaml
-```
+### Test jednostkowy Enkodowania ramki protokołu komunikacyjnego w Rust: ###
 
-Kod symulatora jest zawarty w pliku ```tcp_simulator.py```, po uruchomieniu go z argumentem --help zobaczysz dostępne argumenty startowe.
-Domyślne wartości argumentów są w pełni wystarczające do działania.
+https://github.com/user-attachments/assets/d09c9729-24d3-400a-ace6-5eed1b037f6f
 
-Aby uruchomić symulator należy uruchomić pierwsze serwer proxy, odpowiedzialny za pośredniczenie w komunikacji między oprogramowaniem kontrolii misji a infrastrukturą sprzętową rakiety. To repozytorium zawiera uproszczoną implementację serwera proxy dostępną w pliku ```tcp_proxy.py```. Możesz ją uruchomić w następujący sposób:
-```bash
-python tcp_proxy.py
-```
-Dodatkowe argumenty nie są wymagane ale również możesz uzyskać do nich dostęp za pomocą argumentu --help.
+## Jak odpalić? 
 
-mając uruchomione proxy, możesz uruchomić symulator:
-```bash
-python tcp_simulator.py
-```
+1. Symulacja lotu rakiety (z root directory):
+   
+      - Terminal #1
+       
+             python tcp_proxy.py
+       
+      - Terminal #2
+        
+              python tcp_simulator.py --verbose
+      
+      - Terminal #3
+        
+              ground_station/launch_sequencer.py
+  
+2. Test Encodera ramek protokołu komunikacyjnego w Rust (root/rust_protocol):
+   
+   - Terminal #1
 
-Symulator automatycznie połączy się z serwerem proxy, co powinno zostać przez niego wyprintowane.
-
-Plik ```frame_sending_receiving_example.py``` zawiera przykład jak możesz skorzystać z communication_library do zaimplementowania swojego rozwiązania. Są tam przedstawione wszystkie elementy potrzebne do wysłania polecenia do symulatora i odebrania od niego informacji.
-
-### Działanie symulatora
-
-**Disclaimer**:
-Symulator skupia się przede wszystkim na zapewnieniu podstawowych funkcjonalności odnośnie obsługi stack'a komunikacyjnego. Działanie rakiety nie zostało zaimplementowane z myślą o poprawności fizycznej, stąd też możliwe że wartości wyświetlane przez niego nie będą mieć pełnego odzwierciedlenia w rzeczywistości. Symulator **nie** przedstawia żadnej z naszych istniejących rakiet, osiągi rakiety przedstawionej w symulatorze są ściśle poglądowe a procedury i obostrzenia z nimi związane wymagane do startu zostaly uproszczone na potrzeby zadania.
-
-#### Podzespoły pokładowe obecne w symulowanej rakiecie:
-
-Serwomechanizmy (servo):
-- fuel_intake <-- odpowiedzialny za zawór do tankowania paliwa
-- oxidizer_intake <-- odpowiedzialny za zawór do tankowania utleniacza
-- fuel_main <-- zawór główny paliwa
-- oxidizer_main <-- zawór główny utleniacza
-
-Operacje możliwe do wykonania:
-- POSITION <-- ustawienie pozycji serwomechanizmu (0 to pozycja otwarta, 100 to pozycja zamknięta)
-
-Przekaźniki (relay):
-- oxidizer_heater <-- sterowanie grzałką utleniacza
-- igniter <-- sterowanie zapalnikiem
-- parachute <-- sterowanie wyrzutem spadochronu
-
-Operacje możliwe do wykonania:
-- OPEN <-- przekaźnik w pozycji przewodzącej
-- CLOSE <-- przekaźnik w pozycji nieprzewodzącej
-
-Sensory:
-- fuel_level <-- procentowa ilość paliwa w zbiorniku
-- oxidizer_level <-- procentowa ilość utleniacza w zbiorniku
-- altitude <-- wysokość na jakiej jest rakieta
-- oxidizer_pressure <-- ciśnienie utleniacza w jego zbiorniku
-- angle <-- kąt pod jakim nachylona jest rakieta (0 stopni to nosecone zwrócony pionowo, 90 stopni to pozycja horyzontalna)
-
-Operacje możliwe do wykonania:
-- READ
-
-Przykłady wywołania tych operacji zostały przedstawione w pliku ```frame_sending_receiving_example.py```
-
-Aby określić z jakiego ID urządzenia musisz skorzystać aby wysłać do niego ramkę, skorzystaj z pliku ```simulator_config.yml``` gdzie wylistowane są wszystkie podzespoły obecne w symulatorze.
-Numery identyfikacyjne są widoczne w polach "device_id".
-Każdy typ urządzenia ma swoją osobną przestrzeń identyfikatorów, co oznacza że identyfikatory urządzeń mogą się pokrywać jeśli dwa urządzenia są różnego typu.
+           cargo test -- --nocapture
 
 
-#### Protokół komunikacyjny
+# Dokumentacja
 
-Repozytorium zawiera okrojoną wersję protokołu komunikacyjnego z jakiego korzystamy. Konkretne pola jakie znajdują się w ramce protokołu oraz za co odpowiadają możesz zobaczyć w pliku ```communication_library/frame.py```.
+## flight_controller.py
 
-Ramki jakie wysyła i odbiera symulator możesz zobaczyć po uruchomieniu go z argumentem ```--verbose```. Będzie on przydatny jeśli symulator nie będzie rozpoznawał ramki jaką do niego wysyłasz.
+**Prosty automat stanów lotu z podstawowymi zabezpieczeniami**
 
-Ważnym polem w naszej ramce komunikacyjnej jest pole ```action```, odpowiada ono za tym akcji jaki jest podejmowany za pośrednictwem danej ramki.
-W tym repozytorium wykorzystujemy tylko akcje: SERVICE, ACK, NACK oraz FEED.
 
-- SERVICE <-- Odpowiada za zlecenie operacji w podzespołach rakiety, z prośbą o potwierdznie czy zostały wykonane pomyślnie lub nie. W sytuacji gdy operacja zostanie wykonana pomyślnie symulator odeśle taką samą ramkę jak do niego wysłaliśmy, tylko z zamienionymi polami destination i source (bo wysyła ją od siebie do nas), oraz z akcją ACK w polu action. W sytuacji gdyby operacja się nie powiodła to zamiast ACK znajdziesz tam operację NACK. W tym zadaniu możesz dokonać lotu rakiety bez weryfikacji ACK'ów, ale doceniamy sprawdzanie czy operacja została zatwierdzona lub odrzucona przez symulator :)
+*Metody kluczowe:*
 
-- FEED <-- Odczyt z sensora, bądź informacja diagnostyczna. Ramki z akcją feed są ramkami wysyłanymi przez symulator bez "proszenia" go o to. Symulator wysyła FEED'y co sekundę, możesz jednak zmniejszyć lub zwiększyć interwał z jakim są one wysyłane za pomocą argumentu ```--feed-interval``` w symulatorze.
+   - **tank_oxidizer() / tank_fuel()** : otwiera zawory, czeka aż poziom = 100%, zamyka
+   - **heat_oxidizer()** : włącza grzałkę utleniacza, czeka aż ciśnienie będzie w oknie zapłonu (55–65 bar), pilnuje żeby nie eksplodowało
+   - **ignition_sequence()** : odpala silnik z kontrolą bezpieczeństwa (intake’y zamknięte, dobre ciśnienie, sekwencja zawory → zapalnik)
+   - **climb_and_detect_apogee()** : śledzi wysokość, wykrywa apogeum
+   - **descent_and_chute()** : w fazie spadania decyduje kiedy wyrzucić spadochron (nie za wysoko, nie za szybko, albo awaryjnie po ok. 9s), potem czeka aż rakieta „przestanie spadać” i uznaje lądowanie
+   - **full_auto_mission()** – klei to wszystko w jedną misję od tankowania do lądowania i przerywa jeśli coś pójdzie w ABORT
 
-#### Jak wykonać start rakiety?
+## rocket_client.py
 
-Opis ten przedstawia jak wykonać procedurę tankowania i lotu w opisanym w tym repozytorium symulatorze.
-Lot rakiety może się nie powieść, prosimy się jednak nie martwić ponieważ możesz próbować tyle razy ile chcesz i nie wpływa to negatywnie na ocene (kod nie zawiera żadnych elemtnów śledzących postępy).
+**klient wysokiego poziomu, który łączy się z rakietą przez TCP, wysyła komendy (zawory, zapłon, spadochron) i zbiera telemetrię w tle**
 
-##### Procedura tankowania i startu:
+*Metody kluczowe:*
 
-1. **Tankowanie utleniacza (oxidizer)**:
-   - Otwórz zawór tankowania utleniacza (oxidizer_intake)
-   - Poczekaj aż zbiornik napełni się do 100%
-   - Zamknij zawór tankowania utleniacza
-   - Ciśnienie utleniacza powinno osiągnąć około 30 bar
+   - **set_servo_position(name, pos)** : rusza serwem / zaworem (np. „otwórz fuel_main”)
+   - **relay_open(name) / relay_close(name)** : włącza/wyłącza przekaźniki (grzałka, igniter, spadochron)
+   - **get_telem(key) / get_all_telem()** : daje ostatnie znane wartości sensorów (poziom paliwa, ciśnienie, wysokość, itd)
 
-2. **Tankowanie paliwa (fuel)**:
-   - Otwórz zawór tankowania paliwa (fuel_intake)
-   - Poczekaj aż zbiornik napełni się do 100%
-   - Zamknij zawór tankowania paliwa
+## launch_sequencer.py
 
-3. **Podgrzewanie utleniacza**:
-   - Włącz grzałkę utleniacza (oxidizer_heater)
-   - Monitoruj ciśnienie - zakres ciśnienia w jakim należy wykonać zapłon to 55-65 bar
+**skrypt, który odpala pełną misję automatycznie, krok po kroku**
 
-4. **Sekwencja zapłonu**:
-   - Otwórz zawór główny paliwa (fuel_main)
-   - Otwórz zawór główny utleniacza (oxidizer_main)
-   - Otwarcie zaworów należy wykonać w przeciągu maksymalnie jednej sekundy od siebie, inaczej skończy się to wybuchem rakiety.
-   - Włącz igniter, uruchomienie ignitera powinno wydarzyć się po otwarciu zaworów ale nie później niż 1 sekundę, inaczej komora spalania zostanie zalana i zapłon się nie powiedzie.
-   - Rakieta startuje
+      1. Ładuje config simulator_config.yaml
+   
+      2. Tworzy RocketClient i FlightController
+   
+      3. Czeka chwilę na pierwszą telemetrię
+   
+      4. Odpala full_auto_mission()
+   
+      5. Na końcu wyświetla stan misji i ostatnią telemetrię
 
-5. **Faza lotu**:
-   - Rakieta będzie spalać paliwo i nabierać wysokości
-   - Po wypaleniu paliwa rakieta będzie lecieć jeszcze jakiś czas wytracając prędkość
-   - Po osiągnięciu apogeum (najwyższego punktu) rakieta zacznie opadać
+## crc.rs
 
-6. **Lądowanie**:
-   - Wyrzuć spadochron (parachute) w odpowiednim momencie po apogeum
-   - Poczekaj aż rakieta bezpiecznie wyląduje
-   - wyrzucenie spadochronu przy prędkości większej niż 30 m/s spowoduje jego urwanie.
+**implementacja CRC32 MPEG-2 dokładnie w tym formacie, którego używa protokół**
 
-##### Warunki prowadzące do eksplozji/awarii:
+    * Liczy CRC32 MPEG-2 dokładnie tak, jak robi to kod po stronie Pythona
 
-**Podczas tankowania:**
-- Otwarcie zaworu paliwa (fuel_intake) przed napełnieniem zbiornika utleniacza
-- Przekroczenie ciśnienia utleniacza powyżej 90 bar (zbyt długie podgrzewanie)
+    * Robi padding do 4 bajtów, przerabia dane na słowa 32-bit, liczy CRC32 wg polinomu protokołu i zwraca 4 bajty CRC
 
-**Podczas sekwencji zapłonu:**
-- Otwarcie zaworów głównych z różnicą czasu większą niż 1 sekunda przy włączonym zapłonniku
-- Włączenie zapłonnika z opóźnieniem większym niż 1 sekunda po otwarciu zaworów głównych
-- Włączenie zapłonnika przed otwarciem zaworów głównych
-- Ciśnienie utleniacza poniżej 40 bar przy zapłonie (silnik się nie zapali)
-- Ciśnienie utleniacza powyżej 65 bar przy zapłonie (eksplozja silnika)
-- Pozostawienie otwartych zaworów tankowania (fuel_intake lub oxidizer_intake) podczas zapłonu
+## frame.rs
 
-**Podczas lotu:**
-- Otwarcie spadochronu przy pracującym silniku
-- Otwarcie spadochronu przy prędkości przekraczającej 30 m/s (spadochron się zerwie)
-- Nieotwarcie spadochronu w ciągu 10 sekund od osiągnięcia apogeum (lądowanie bez spadochronu)
+**definicja struktury ramki + funkcje pakujące pola i odwracające bity tak jak w protokole**
 
-**Uwagi:**
-- Ciśnienie utleniacza w zakresie 55-65 bar zapewnia optymalny ciąg (100%)
-- Ciśnienie utleniacza w zakresie 40-55 zapewnia zmniejszony ciąg (50-100%)
-- Symulator wyświetla komunikaty o błędach i aktualnym stanie rakiety
-- Argument `--verbose` przy uruchomieniu symulatora pozwala śledzić wszystkie wysyłane i odbierane ramki
+*Metody kluczowe:*
+
+   - **FrameFields** : pola nagłówka ramki (destination, device_id, itd) + 4 bajty payloadu
+
+   - **pack_frame_bits()** : buduje surowe 10 bajtów (nagłówek + pola + payload). Docelowo ten sam bit-pack co w Pythonie
+
+   - **reverse_all_bytes() / reverse_bits_in_byte()** : odwracanie kolejności bitów w każdym bajcie
+
+## lib.rs
+
+**główny encoder ramki: pakuje pola, odwraca bity, liczy CRC i składa finalne 14 bajtów do wysłania**
+
+**Sklejka całości**
+
+*Metody kluczowe:*
+
+   - **encode_frame(frame)** :
+
+           1. pakuje pola do 10 bajtów 
+         
+           2. odwraca bity w każdym bajcie 
+         
+           3. liczy CRC32 
+         
+           4. dokleja CRC.
+
+## encode_demo.rs
+
+**Test jednostkowy który pokazuje, że encoder w Ruście działa i daje sensowne wyjście**
+
+      1. Buduje przykładową ramkę „ustaw serwo w pozycję 0”
+      
+      2. Przepuszcza ją przez encode_frame
+      
+      3. Wypisuje bajty i sprawdza, że wynik ma 14 bajtów (10 danych + 4 CRC)
+
