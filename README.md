@@ -104,7 +104,7 @@ https://github.com/user-attachments/assets/d09c9729-24d3-400a-ace6-5eed1b037f6f
 
 ## frame.rs
 
-**definicja struktury ramki + funkcje pakujące pola i odwracające bity tak jak w protokole**
+**struktura ramki + funkcje pakujące pola i odwracające bity tak jak w pierwotnym protokole**
 
 *Metody kluczowe:*
 
